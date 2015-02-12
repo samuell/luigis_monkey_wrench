@@ -1,4 +1,4 @@
-## Luigi's Monkey Wrench
+# Luigi's Monkey Wrench
 
 This library intends to make [Luigi]() workflows for typical tasks on the commandline
 in e.g. bioinformatics, a tad easier and more fluent, by allowing to define workflow
@@ -51,12 +51,31 @@ class MyWorkFlow(luigi.Task):
 if __name__ == '__main__':
     luigi.run()
 ````
-
 Now run this (as usual with luigi tasks) like this:
 ````bash
 python workflow_example.py --local-scheduler MyWorkFlow
 ````
 
-### Current Status: Experimental
+## Quick start
+
+Install the dependencies, luigi (and optionally tornado):
+````bash
+pip install luigi
+pip install tornado
+````
+
+Clone this git repo to somewhere:
+````bash
+mkdir testlmw
+cd testlmw
+git clone https://github.com/samuell/luigis_monkey_wrench.git .
+````
+
+Run the example script (or one that you have already)
+````bash
+python workflow_example.py --local-scheduler MyWorkFlow
+````
+
+## Current Status: Experimental
 
 ***Use on your own risk only!***

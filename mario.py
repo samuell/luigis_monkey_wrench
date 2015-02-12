@@ -44,32 +44,4 @@ class ShellTask(luigi.Task):
         ms = re.findall('(\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\})', cmd)
         for m in ms:
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
-        print("*** RUNNING COMMAND: " + cmd)
-        print commands.getstatusoutput(cmd)
-
-
-class WorkFlow(luigi.Task):
-    def requires(self):
-        hejer = ShellTask(cmd='echo hej > {o:hej:hej.txt}', inports={'foo': 'bar'})
-        fooer = ShellTask(cmd='cat {i:bla} > {o:foo:foo.txt}')
-
-        #hejer.inports['tjo'] = luigi.LocalTarget('tjo.txt')
-        #fooer = ShellTask(cmd='cat {i:hej} > {o:foo:{i:hej}.foo.txt} # {i:tjo:tjo.txt}')
-
-        # Define workflow
-        fooer.inports['bla'] = hejer.get_out('hej')
-        return fooer
-
-    def output(self):
-        return luigi.LocalTarget('workflow_finished')
-
-    def run(self):
-        with self.output().open('w') as outfile:
-            outfile.write('finished')
-
-
-if __name__ == '__main__':
-    luigi.run()
-
-
-
+        commands.getstatusoutput(cmd)

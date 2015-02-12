@@ -5,7 +5,7 @@ class WorkFlow(luigi.Task):
     def requires(self):
         # Create tasks
         hejer = lmw.ShellTask(cmd="echo hej > {o:hej:hej.txt}")
-        fooer = lmw.ShellTask(cmd="cat {i:bla} | sed 's/hej/foo/g' > {o:foo:foo.txt}")
+        fooer = lmw.ShellTask(cmd="cat {i:bla} | sed 's/hej/foo/g' > {o:foo:{i:bla}.foo}")
 
         # Define workflow
         fooer.set_inspec('bla', hejer.get_outspec('hej'))

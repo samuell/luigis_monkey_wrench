@@ -25,9 +25,18 @@ class ShellTask(luigi.Task):
         else: 
             return param
 
+    def _replace_inputs(self, cmd):
+        #import pdb; pdb.set_trace()
+        ms = re.findall('(\{i:([^\}]+)\})', cmd)
+        for m in ms:
+            cmd = cmd.replace(m[0], self.get_input(m[1]).path)
+        return cmd
+
     def output(self):
-        ms = re.findall('\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', self.cmd)
-        outputs = {m[0]: luigi.LocalTarget(m[2]) for m in ms}
+        cmd = self._replace_inputs(self.cmd)
+        ms = re.findall('(\{o:([^\}]+)(:([^\}]+))\})', cmd)
+        #import pdb; pdb.set_trace()
+        outputs = {m[1]: luigi.LocalTarget(m[3]) for m in ms}
         return outputs
 
     def get_outspec(self, outport):
@@ -39,11 +48,8 @@ class ShellTask(luigi.Task):
         self.inports[inport] = value
 
     def run(self):
-        cmd = self.cmd
-        ms = re.findall('(\{i:([A-Za-z0-9-_\.]+)\})', cmd)
-        for m in ms:
-            cmd = cmd.replace(m[0], self.get_input(m[1]).path)
-        ms = re.findall('(\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\})', cmd)
+        cmd = self._replace_inputs(self.cmd)
+        ms = re.findall('(\{o:([^\}]+)(:([^\}]+))\})', cmd)
         for m in ms:
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
         commands.getstatusoutput(cmd)

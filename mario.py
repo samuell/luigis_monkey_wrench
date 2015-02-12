@@ -50,7 +50,7 @@ class ShellTask(luigi.Task):
 
 class WorkFlow(luigi.Task):
     def requires(self):
-        hejer = ShellTask(cmd='echo hej > {o:hej:hej.txt}',inports={'tjo': luigi.LocalTarget('tjo.txt')})
+        hejer = ShellTask(cmd='echo hej > {o:hej:hej.txt}', inports={'foo': 'bar'})
         fooer = ShellTask(cmd='cat {i:bla} > {o:foo:foo.txt}')
 
         #hejer.inports['tjo'] = luigi.LocalTarget('tjo.txt')

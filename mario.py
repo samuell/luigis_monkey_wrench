@@ -32,11 +32,10 @@ class ShellTask(luigi.Task):
             return param
 
     def output(self):
+        ms = re.findall('\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', self.cmd)
+        print('*** MS1: {ms}'.format(ms=str(ms)))
+        outputs = {m[0]: luigi.LocalTarget(m[2]) for m in ms}
         #import pdb; pdb.set_trace()
-        ms = re.findall('\{o:(.+)(:([^\}]+))\}', self.cmd)
-        outputs = []
-        for m in ms:
-            outputs.append(luigi.LocalTarget(m[2]))
         return outputs
 
     def get_out(self, outport):
@@ -48,9 +47,13 @@ class ShellTask(luigi.Task):
     def run(self):
         cmd = self.cmd
         ms = re.findall('\{i:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', cmd)
+        print('*** MS2: {ms}'.format(ms=str(ms)))
         for m in ms:
             cmd = cmd.replace(m[1], self.get_input(m[2]))
-        cmd = re.sub('\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', '\\3', cmd)
+        ms = re.findall('\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', cmd)
+        print('*** MS3: {ms}'.format(ms=str(ms)))
+        for m in ms:
+            cmd = cmd.replace(m[1], self.get_input(m[2]))
         #import pdb; pdb.set_trace()
         print("*** Trying now to run command: " + cmd)
         print commands.getstatusoutput(cmd)
@@ -65,14 +68,15 @@ class WorkFlow(luigi.Task):
         #fooer = ShellTask(cmd='cat {i:hej} > {o:foo:{i:hej}.foo.txt} # {i:tjo:tjo.txt}')
 
         # Define workflow
-        #fooer.set_in('bla', hejer.get_out('hej'))
+        fooer.set_in('bla', { 'upstream' : { 'task' : hejer, 'port' : 'hej' } })
 
         #import pdb; pdb.set_trace()
-        return hejer
+
+        return fooer
 
     def output(self):
         #import pdb; pdb.set_trace()
-        return luigi.LocalTarget(self.input()[0].path + '.workflow_finished')
+        return luigi.LocalTarget('workflow_finished')
 
     def run(self):
         with self.output().open('w') as outfile:

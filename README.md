@@ -1,8 +1,8 @@
 # Luigi's Monkey Wrench
 
-This library intends to make [Luigi]() workflows for typical tasks on the commandline
-in e.g. bioinformatics, a tad easier and more fluent, by allowing to define workflow
-tasks and dependencies in the following fashion:
+This is a small library (50 LOC exactly, as of Feb 12) that intends to make writing [Luigi]() workflows that use a lot of shell commands
+(which is common e.g. in bioinformatics) a tad easier by allowing to define workflow tasks with a simple shell command pattern, and 
+dependencies by using a simple single-assignment patter for specifying how tasks inputs depend on each other's outputs, like so:
 
 ````python
 import luigi

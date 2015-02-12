@@ -8,9 +8,7 @@ class AFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.filename)
 
 class ShellTask(luigi.Task):
-    inports = {}
-    outports = {}
-
+    inports = luigi.Parameter(default={})
     cmd = luigi.Parameter()
 
     def requires(self):
@@ -46,32 +44,30 @@ class ShellTask(luigi.Task):
 
     def run(self):
         cmd = self.cmd
-        ms = re.findall('\{i:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', cmd)
+        ms = re.findall('(\{i:([A-Za-z0-9-_\.]+)\})', cmd)
         print('*** MS2: {ms}'.format(ms=str(ms)))
         for m in ms:
-            cmd = cmd.replace(m[1], self.get_input(m[2]))
-        ms = re.findall('\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', cmd)
+            cmd = cmd.replace(m[0], self.get_input(m[1]).path)
+        ms = re.findall('(\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\})', cmd)
         print('*** MS3: {ms}'.format(ms=str(ms)))
-        for m in ms:
-            cmd = cmd.replace(m[1], self.get_input(m[2]))
         #import pdb; pdb.set_trace()
+        for m in ms:
+            cmd = cmd.replace(m[0], self.output()[m[1]].path)
         print("*** Trying now to run command: " + cmd)
         print commands.getstatusoutput(cmd)
 
 
 class WorkFlow(luigi.Task):
     def requires(self):
-        hejer = ShellTask(cmd='echo hej > {o:hej:hej.txt}')
-        hejer.inports['tjo'] = luigi.LocalTarget('tjo.txt')
-
+        hejer = ShellTask(cmd='echo hej > {o:hej:hej.txt}',inports={'tjo': luigi.LocalTarget('tjo.txt')})
         fooer = ShellTask(cmd='cat {i:bla} > {o:foo:foo.txt}')
+
+        #hejer.inports['tjo'] = luigi.LocalTarget('tjo.txt')
         #fooer = ShellTask(cmd='cat {i:hej} > {o:foo:{i:hej}.foo.txt} # {i:tjo:tjo.txt}')
 
-        # Define workflow
-        fooer.set_in('bla', { 'upstream' : { 'task' : hejer, 'port' : 'hej' } })
-
         #import pdb; pdb.set_trace()
-
+        # Define workflow
+        fooer.inports['bla'] = { 'upstream' : { 'task' : hejer, 'port' : 'hej' } }
         return fooer
 
     def output(self):

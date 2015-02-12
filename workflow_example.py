@@ -4,11 +4,11 @@ import mario as m
 class WorkFlow(luigi.Task):
     def requires(self):
         # Create tasks
-        hejer = m.ShellTask(cmd='echo hej > {o:hej:hej.txt}', inports={'foo': 'bar'})
+        hejer = m.ShellTask(cmd='echo hej > {o:hej:hej.txt}')
         fooer = m.ShellTask(cmd='cat {i:bla} > {o:foo:foo.txt}')
 
         # Define workflow
-        fooer.inports['bla'] = hejer.get_out('hej')
+        fooer.set_inspec('bla', hejer.get_outspec('hej'))
 
         # Return the last task in the workflow
         return fooer

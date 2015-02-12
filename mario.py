@@ -8,14 +8,14 @@ class AFile(luigi.ExternalTask):
         return luigi.LocalTarget(self.filename)
 
 class ShellTask(luigi.Task):
-    inports = luigi.Parameter(default={})
     cmd = luigi.Parameter()
 
     def requires(self):
         upstream_tasks = []
-        for portname, inport in self.inports.iteritems():
-            if type(inport) is dict:
-                upstream_tasks.append(inport['upstream']['task'])
+        if hasattr(self, 'inports'):
+            for portname, inport in self.inports.iteritems():
+                if type(inport) is dict:
+                    upstream_tasks.append(inport['upstream']['task'])
         return upstream_tasks
  
     def get_input(self, input_name):
@@ -30,10 +30,12 @@ class ShellTask(luigi.Task):
         outputs = {m[0]: luigi.LocalTarget(m[2]) for m in ms}
         return outputs
 
-    def get_out(self, outport):
+    def get_outspec(self, outport):
         return { 'upstream' : { 'task': self, 'port': outport } }
 
-    def set_in(self, inport, value):
+    def set_inspec(self, inport, value):
+        if not hasattr(self, 'inports'):
+            self.inports = {}
         self.inports[inport] = value
 
     def run(self):

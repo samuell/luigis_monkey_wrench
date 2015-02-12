@@ -15,15 +15,16 @@ class ShellTask(luigi.Task):
 
     def requires(self):
         upstream_tasks = []
-        print "INPORTS: " + str(self.inports)
+        print "*** INPORTS: " + str(self.inports)
         #import pdb; pdb.set_trace()
         for portname, inport in self.inports.iteritems():
             if type(inport) is dict:
                 upstream_tasks.append(inport['upstream']['task'])
-        print("UPSTREAM TASKS: " + str(upstream_tasks))
+        print("*** UPSTREAM TASKS: " + str(upstream_tasks))
         return upstream_tasks
  
     def get_input(self, input_name):
+        #import pdb; pdb.set_trace()
         param = self.inports[input_name]
         if type(param) is dict and 'upstream' in param:
             return param['upstream']['task'].output()[param['upstream']['port']]
@@ -31,10 +32,11 @@ class ShellTask(luigi.Task):
             return param
 
     def output(self):
-        outputs = [luigi.LocalTarget(m[2]) for m in re.findall('\{o:(.*)(:(.*))\}', self.cmd)]
-        output_strs = ', '.join([o.path for o in outputs])
-        print("OUTPUT PATHS:   " + output_strs)
-        print("OUTPUT TARGETS: " + str(outputs))
+        #import pdb; pdb.set_trace()
+        ms = re.findall('\{o:(.+)(:([^\}]+))\}', self.cmd)
+        outputs = []
+        for m in ms:
+            outputs.append(luigi.LocalTarget(m[2]))
         return outputs
 
     def get_out(self, outport):
@@ -44,8 +46,13 @@ class ShellTask(luigi.Task):
         self.inports[inport] = value
 
     def run(self):
-        cmd = re.sub('\{o:(.*)(:(.*))\}', '\\3', self.cmd)
-        print("Trying now to run command: " + cmd)
+        cmd = self.cmd
+        ms = re.findall('\{i:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', cmd)
+        for m in ms:
+            cmd = cmd.replace(m[1], self.get_input(m[2]))
+        cmd = re.sub('\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', '\\3', cmd)
+        #import pdb; pdb.set_trace()
+        print("*** Trying now to run command: " + cmd)
         print commands.getstatusoutput(cmd)
 
 
@@ -54,11 +61,11 @@ class WorkFlow(luigi.Task):
         hejer = ShellTask(cmd='echo hej > {o:hej:hej.txt}')
         hejer.inports['tjo'] = luigi.LocalTarget('tjo.txt')
 
-        fooer = ShellTask(cmd='cat {i:hej} > {o:foo:{i:hej}.foo.txt}')
+        fooer = ShellTask(cmd='cat {i:bla} > {o:foo:foo.txt}')
         #fooer = ShellTask(cmd='cat {i:hej} > {o:foo:{i:hej}.foo.txt} # {i:tjo:tjo.txt}')
 
         # Define workflow
-        #fooer.set_in('hej', hejer.get_out('hej'))
+        #fooer.set_in('bla', hejer.get_out('hej'))
 
         #import pdb; pdb.set_trace()
         return hejer

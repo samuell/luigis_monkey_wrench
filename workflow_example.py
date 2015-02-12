@@ -1,5 +1,5 @@
 import luigi
-import luigis_monkeywrench as lmw
+import luigis_monkey_wrench as lmw
 
 class WorkFlow(luigi.Task):
     def requires(self):

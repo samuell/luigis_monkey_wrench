@@ -1,29 +1,45 @@
-## FloWork
+## Luigi's Monkey Wrench
 
-This library intends to make the following syntax possible, 
-for defining and running command-line workflows:
+This library intends to make [Luigi]() workflows for typical tasks on the commandline
+in e.g. bioinformatics, a tad easier and more fluent, by allowing to define workflow
+tasks and dependencies in the following fashion:
 
 ````python
-// Create tasks
+import luigi
+import monkeywrench as lmw
 
-// Create a task that runs some data through grep, which keeps
-// only lines containing "hej"
-grep = fw.ShellTask('cat {i:rawdata} | grep hej > {o:grepped}')
+class WorkFlow(luigi.Task):
+    def requires(self):
+        # Create tasks by initializing ShellTasks, and giving
+        # the shell tasks to execute to the cmd parameter.
+        # File names are given in a this special form:
+        #   {i:<input name>}
+        #   {o:<output name>:<output filename>}
+        hejer = lmw.ShellTask(cmd="echo hej > {o:hej:hej.txt}")
+        fooer = lmw.ShellTask(cmd="cat {i:bla} | sed 's/hej/foo/g' > {o:foo:foo.txt}")
 
-// Create a task that copies a file into another one, with .2 added
-//  to the file name.
-copy = fw.ShellTask('cp {i:orig} {o:copy}.2')
+        # Define how outputs from tasks are re-used in inputs
+        # of other tasks
+        fooer.set_inspec('bla', hejer.get_outspec('hej'))
 
-// Network definition (connect outports to inports)
-copy.set_inport("orig") = grep.get_outport("grepped")
-// the .get_outport() function would here return the
-// struct that describes what to run, etc.
+        # Return the last task in the workflow
+        return fooer
 
-// For the initial inport, we have to create an inport
-// "semi-manually", since we don't get it from any outport.
-grep.set_inport('rawdata') = luigi.LocalTarget('hejsan.txt')
+    def output(self):
+        # Print some dummy file to tell that the workflow is finished
+        return luigi.LocalTarget('workflow_finished')
 
-// We start the process by letting luigi run
+    def run(self):
+        # Write some dummy content to dummy file
+        with self.output().open('w') as outfile:
+            outfile.write('finished')
+
+
+# We start the process by letting luigi run
 if __name__ == '__main__':
-	luigi.run()
+    luigi.run()
 ````
+
+### Current Status: Experimental
+
+***Use on your own risk only!***

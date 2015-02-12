@@ -10,6 +10,10 @@ class AFile(luigi.ExternalTask):
 class ShellTask(luigi.Task):
     cmd = luigi.Parameter()
 
+    def __init__(self, *args, **kwargs):
+        super(ShellTask, self).__init__(*args, **kwargs)
+        self.inports = {}
+
     def requires(self):
         upstream_tasks = []
         if hasattr(self, 'inports'):
@@ -39,13 +43,13 @@ class ShellTask(luigi.Task):
         outputs = {m[1]: luigi.LocalTarget(m[3]) for m in ms}
         return outputs
 
-    def get_outspec(self, outport):
+    def get_outport_ref(self, outport):
         return { 'upstream' : { 'task': self, 'port': outport } }
 
-    def set_inspec(self, inport, value):
+    def inport(self, portname):
         if not hasattr(self, 'inports'):
             self.inports = {}
-        self.inports[inport] = value
+        return self.inports[portname]
 
     def run(self):
         cmd = self._replace_inputs(self.cmd)

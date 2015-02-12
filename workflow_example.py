@@ -8,7 +8,7 @@ class WorkFlow(luigi.Task):
         fooer = lmw.ShellTask(cmd="cat {i:bla} | sed 's/hej/foo/g' > {o:foo:{i:bla}.foo}")
 
         # Define workflow
-        fooer.set_inspec('bla', hejer.get_outspec('hej'))
+        fooer.inports['bla'] = hejer.get_outport_ref('hej')
 
         # Return the last task in the workflow
         return fooer

@@ -13,16 +13,12 @@ class ShellTask(luigi.Task):
 
     def requires(self):
         upstream_tasks = []
-        print "*** INPORTS: " + str(self.inports)
-        #import pdb; pdb.set_trace()
         for portname, inport in self.inports.iteritems():
             if type(inport) is dict:
                 upstream_tasks.append(inport['upstream']['task'])
-        print("*** UPSTREAM TASKS: " + str(upstream_tasks))
         return upstream_tasks
  
     def get_input(self, input_name):
-        #import pdb; pdb.set_trace()
         param = self.inports[input_name]
         if type(param) is dict and 'upstream' in param:
             return param['upstream']['task'].output()[param['upstream']['port']]
@@ -31,9 +27,7 @@ class ShellTask(luigi.Task):
 
     def output(self):
         ms = re.findall('\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\}', self.cmd)
-        print('*** MS1: {ms}'.format(ms=str(ms)))
         outputs = {m[0]: luigi.LocalTarget(m[2]) for m in ms}
-        #import pdb; pdb.set_trace()
         return outputs
 
     def get_out(self, outport):
@@ -45,15 +39,12 @@ class ShellTask(luigi.Task):
     def run(self):
         cmd = self.cmd
         ms = re.findall('(\{i:([A-Za-z0-9-_\.]+)\})', cmd)
-        print('*** MS2: {ms}'.format(ms=str(ms)))
         for m in ms:
             cmd = cmd.replace(m[0], self.get_input(m[1]).path)
         ms = re.findall('(\{o:([A-Za-z0-9-_\.]+)(:([A-Za-z0-9-_\.]+))\})', cmd)
-        print('*** MS3: {ms}'.format(ms=str(ms)))
-        #import pdb; pdb.set_trace()
         for m in ms:
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
-        print("*** Trying now to run command: " + cmd)
+        print("*** RUNNING COMMAND: " + cmd)
         print commands.getstatusoutput(cmd)
 
 
@@ -65,13 +56,11 @@ class WorkFlow(luigi.Task):
         #hejer.inports['tjo'] = luigi.LocalTarget('tjo.txt')
         #fooer = ShellTask(cmd='cat {i:hej} > {o:foo:{i:hej}.foo.txt} # {i:tjo:tjo.txt}')
 
-        #import pdb; pdb.set_trace()
         # Define workflow
         fooer.inports['bla'] = { 'upstream' : { 'task' : hejer, 'port' : 'hej' } }
         return fooer
 
     def output(self):
-        #import pdb; pdb.set_trace()
         return luigi.LocalTarget('workflow_finished')
 
     def run(self):

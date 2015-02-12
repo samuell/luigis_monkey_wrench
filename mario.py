@@ -57,7 +57,7 @@ class WorkFlow(luigi.Task):
         #fooer = ShellTask(cmd='cat {i:hej} > {o:foo:{i:hej}.foo.txt} # {i:tjo:tjo.txt}')
 
         # Define workflow
-        fooer.inports['bla'] = { 'upstream' : { 'task' : hejer, 'port' : 'hej' } }
+        fooer.inports['bla'] = hejer.get_out('hej')
         return fooer
 
     def output(self):

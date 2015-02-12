@@ -2,6 +2,10 @@ i = sys.argv[1]
 
 # Tasks
 grep = fw.ShellTask('cat {i:rawdata} | grep hej > {o:grepped:{i:rawdata}.grepped}')
+grep.slurmparams('-A b2013262 -t 10:00 ...')
+grep.set_mode('slurm')
+
+
 copy = fw.ShellTask('cp {i:orig} {o:copy}.2')
 
 # Workflow

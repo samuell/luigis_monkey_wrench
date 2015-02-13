@@ -45,9 +45,14 @@ class ShellTask(luigi.Task):
             return param
 
     def _replace_inputs(self, cmd):
-        ms = re.findall('(\<i:([^\>]+)\>)', cmd)
+        ms = re.findall('(\<i:([^\>\:]+)(:([^\>\|]+)\|([^\>]+))?\>)', cmd)
         for m in ms:
-            cmd = cmd.replace(m[0], self.get_input(m[1]).path)
+            if m[2] != '':
+                # Replace according to replacement syntax
+                new_path = re.sub('%s$' % m[3], m[4], self.get_input(m[1]).path)
+                cmd = cmd.replace(m[0], new_path)
+            else:
+                cmd = cmd.replace(m[0], self.get_input(m[1]).path)
         return cmd
 
     def _find_outputs(self, cmd):

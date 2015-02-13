@@ -30,21 +30,21 @@ class ShellTask(luigi.Task):
             return param
 
     def _replace_inputs(self, cmd):
-        #import pdb; pdb.set_trace()
-        ms = re.findall('(\{i:([^\}]+)\})', cmd)
+        ms = re.findall('(\<i:([^\>]+)\>)', cmd)
         for m in ms:
             cmd = cmd.replace(m[0], self.get_input(m[1]).path)
         return cmd
 
     def output(self):
         cmd = self._replace_inputs(self.cmd)
-        ms = re.findall('(\{o:([^\}]+)(:([^\}]+))\})', cmd)
-        #import pdb; pdb.set_trace()
+        ms = re.findall('(\<o:([^\>]+)(:([^\>]+))\>)', cmd)
         outputs = {m[1]: luigi.LocalTarget(m[3]) for m in ms}
         return outputs
 
     def get_outport_ref(self, outport):
         return { 'upstream' : { 'task': self, 'port': outport } }
+    def outport(self, outport):
+        return self.get_outport_ref(outport)
 
     def inport(self, portname):
         if not hasattr(self, 'inports'):

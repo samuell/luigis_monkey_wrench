@@ -1,8 +1,8 @@
 import luigi
-import luigis_monkey_wrench as lmw
+from luigis_monkey_wrench import *
 
 # Yes, we write the workflow definition inside a normal luigi task ...
-class MyWorkFlow(luigi.Task):
+class MyWorkFlow(WorkflowTask):
 
     # ... and do this by setting up the dependency graph and (letting the workflow
     # task depend on it, by) returning the last task in the dependecy graph in the
@@ -11,31 +11,20 @@ class MyWorkFlow(luigi.Task):
 
         # Create tasks by initializing ShellTasks, and giving
         # the shell tasks to execute to the cmd parameter.
-        # File names are given in a this special form:
-        #   {i:<input name>}
-        #   {o:<output name>:<output filename>}
+        # File names are given in a this special form (including <>):
+        #   <i:INPUT_NAME>
+        #   <o:OUTPUT_NAME:OUTPUT_FILENAME>
         # Output file names can also include the filename of an input:
-        #   {o:some_output:{i:some_input}.some_extension}
-        hejer = lmw.ShellTask(cmd="echo hej > {o:hejfile:hej.txt}")
-        fooer = lmw.ShellTask(cmd="cat {i:hejfile} | sed 's/hej/foo/g' > {o:foofile:{i:hejfile}.foo}")
+        #   <o:some_output:<i:some_input>.some_extension>
+        hejer = shell('echo hej > <o:hejfile:hej.txt>')
+        fooer = shell('cat <i:hejfile> | sed "s/hej/foo/g" > <o:foofile:<i:hejfile>.foo>')
 
         # Define the workflow "dependency graph" by telling how outputs
         # from tasks are re-used in inputs of other tasks
-        fooer.inports['hejfile'] = hejer.get_outport_ref('hejfile')
+        fooer.inports['hejfile'] = hejer.outport('hejfile')
 
         # Return the last task in the workflow
         return fooer
-
-
-    def output(self):
-        # Return a dummy file that will tell that the workflow is finished
-        return luigi.LocalTarget('workflow_finished')
-
-
-    def run(self):
-        # Write some dummy content to dummy file
-        with self.output().open('w') as outfile:
-            outfile.write('finished')
 
 
 # We finally make this file into an executable python file, and let luigi take of the running

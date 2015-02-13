@@ -1,8 +1,18 @@
 import commands
 import luigi
+import random
 import re
 import time
 
+# Convenience methods
+def shell(cmd):
+    # We have to add a unique id, since we sometimes have multiple
+    # tasks with the same command (which is the only real parameter)
+    # to ShellTask
+    random_id = str(random.random())[2:]
+    return ShellTask(cmd=cmd, id=random_id)
+
+# Task classes
 class AFile(luigi.ExternalTask):
     filename = luigi.Parameter()
     def requires(self):
@@ -10,6 +20,7 @@ class AFile(luigi.ExternalTask):
 
 class ShellTask(luigi.Task):
     cmd = luigi.Parameter()
+    id = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
         super(ShellTask, self).__init__(*args, **kwargs)
@@ -22,12 +33,12 @@ class ShellTask(luigi.Task):
                 if type(inport) is dict:
                     upstream_tasks.append(inport['upstream']['task'])
         return upstream_tasks
- 
+
     def get_input(self, input_name):
         param = self.inports[input_name]
         if type(param) is dict and 'upstream' in param:
             return param['upstream']['task'].output()[param['upstream']['port']]
-        else: 
+        else:
             return param
 
     def _replace_inputs(self, cmd):
@@ -59,7 +70,6 @@ class ShellTask(luigi.Task):
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
         print("****** NOW RUNNIGN COMMAND ******: " + cmd)
         commands.getstatusoutput(cmd)
-
 
 class WorkflowTask(luigi.Task):
     def output(self):

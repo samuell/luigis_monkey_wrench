@@ -53,7 +53,19 @@ class ShellTask(luigi.Task):
 
     def run(self):
         cmd = self._replace_inputs(self.cmd)
-        ms = re.findall('(\{o:([^\}]+)(:([^\}]+))\})', cmd)
+        ms = re.findall('(\<o:([^\>]+)(:([^\>]+))\>)', cmd)
         for m in ms:
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
+        print("****** NOW RUNNIGN COMMAND ******: " + cmd)
         commands.getstatusoutput(cmd)
+
+
+class WorkflowTask(luigi.Task):
+    def output(self):
+        timestamp = time.strftime('%Y%m%d.%H%M%S', time.localtime())
+        return luigi.LocalTarget('workflow.complete.{t}'.format(t=timestamp))
+
+    def run(self):
+        timestamp = time.strftime('%Y%m%d.%H%M%S', time.localtime())
+        with self.output().open('w') as outfile:
+            outfile.write('workflow finished at {t}'.format(t=timestamp))

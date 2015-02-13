@@ -1,6 +1,7 @@
+import commands
 import luigi
 import re
-import commands
+import time
 
 class AFile(luigi.ExternalTask):
     filename = luigi.Parameter()

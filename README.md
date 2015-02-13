@@ -1,8 +1,33 @@
 # Luigi's Monkey Wrench
 
 This is a small library (50 LOC exactly, as of Feb 12) that intends to make writing [Luigi]() workflows that use a lot of shell commands
-(which is common e.g. in bioinformatics) a tad easier by allowing to define workflow tasks with a simple shell command pattern, and 
+(which is common e.g. in bioinformatics) a tad easier by allowing to define workflow tasks with a simple shell command pattern, and
 dependencies by using a simple single-assignment patter for specifying how tasks inputs depend on each other's outputs, like so:
+
+````python
+import luigi
+from luigis_monkey_wrench import *
+
+class MyWorkFlow(WorkflowTask):
+    def requires(self):
+		# Create shell tasks
+        hejer = shell('echo hej > <o:hejfile:hej.txt>')
+        fooer = shell('cat <i:hejfile> | sed "s/hej/foo/g" > <o:foofile:<i:hejfile>.foo>')
+
+		# Connect inputs and outputs
+        fooer.inports['hejfile'] = hejer.outport('hejfile')
+
+		# Return the last task in the "workflow"
+        return fooer
+
+# Make this into a runnable script, that passes control to luigi
+if __name__ == '__main__':
+    luigi.run()
+````
+
+Short and neat, ain't it?
+
+But let's go though this example in a bit more detail, to see what we are really doing:
 
 ````python
 import luigi
@@ -10,12 +35,10 @@ from luigis_monkey_wrench import *
 
 # Yes, we write the workflow definition inside a normal luigi task ...
 class MyWorkFlow(WorkflowTask):
-
     # ... and do this by setting up the dependency graph and (letting the workflow
     # task depend on it, by) returning the last task in the dependecy graph in the
 	# workflow task's requires() function:
     def requires(self):
-
         # Create tasks by initializing ShellTasks, and giving
         # the shell tasks to execute to the cmd parameter.
         # File names are given in a this special form (including <>):

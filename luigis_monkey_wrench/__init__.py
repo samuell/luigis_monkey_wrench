@@ -68,8 +68,8 @@ class ShellTask(luigi.Task):
         ms = re.findall('(\<o:([^\>]+)(:([^\>]+))\>)', cmd)
         for m in ms:
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
-        print("****** NOW RUNNIGN COMMAND ******: " + cmd)
-        commands.getstatusoutput(cmd)
+        print("****** NOW RUNNING COMMAND ******: " + cmd)
+        print commands.getstatusoutput(cmd)
 
 class WorkflowTask(luigi.Task):
     def output(self):

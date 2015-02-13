@@ -10,17 +10,13 @@ from luigis_monkey_wrench import *
 
 class MyWorkFlow(WorkflowTask):
     def requires(self):
-		# Create shell tasks
         hejer = shell('echo hej > <o:hejfile:hej.txt>')
         fooer = shell('cat <i:hejfile> | sed "s/hej/foo/g" > <o:foofile:<i:hejfile>.foo>')
 
-		# Connect inputs and outputs
         fooer.inports['hejfile'] = hejer.outport('hejfile')
 
-		# Return the last task in the "workflow"
         return fooer
 
-# Make this into a runnable script, that passes control to luigi
 if __name__ == '__main__':
     luigi.run()
 ````

@@ -12,8 +12,8 @@ def shell(cmd):
     random_id = str(random.random())[2:]
     return ShellTask(cmd=cmd, id=random_id)
 
-def files(file_spec):
-    return shell('# ' + file_spec)
+def file(file_spec):
+    return shell('# <o:' + file_spec + '>')
 
 # Task classes
 class AFile(luigi.ExternalTask):

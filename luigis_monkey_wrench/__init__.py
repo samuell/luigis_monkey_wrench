@@ -75,6 +75,8 @@ class ShellTask(luigi.Task):
         for m in ms:
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
         print("****** NOW RUNNING COMMAND ******: " + cmd)
+        # Remove any trailing comments in the line
+        cmd = re.sub('(\ )?\#.*$', '', cmd)
         print commands.getstatusoutput(cmd)
 
 class WorkflowTask(luigi.Task):

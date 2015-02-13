@@ -50,9 +50,12 @@ class ShellTask(luigi.Task):
             cmd = cmd.replace(m[0], self.get_input(m[1]).path)
         return cmd
 
+    def _find_outputs(self, cmd):
+        return re.findall('(\<o:([^\>]+)(:([^\>]+))\>)', cmd)
+
     def output(self):
         cmd = self._replace_inputs(self.cmd)
-        ms = re.findall('(\<o:([^\>]+)(:([^\>]+))\>)', cmd)
+        ms = self._find_outputs(cmd)
         outputs = {m[1]: luigi.LocalTarget(m[3]) for m in ms}
         return outputs
 
@@ -68,7 +71,7 @@ class ShellTask(luigi.Task):
 
     def run(self):
         cmd = self._replace_inputs(self.cmd)
-        ms = re.findall('(\<o:([^\>]+)(:([^\>]+))\>)', cmd)
+        ms = self._find_outputs(cmd)
         for m in ms:
             cmd = cmd.replace(m[0], self.output()[m[1]].path)
         print("****** NOW RUNNING COMMAND ******: " + cmd)

@@ -9,6 +9,7 @@ def shell(cmd):
     # We have to add a unique id, since we sometimes have multiple
     # tasks with the same command (which is the only real parameter)
     # to ShellTask
+    cmd = re.sub('\s+', ' ', cmd.strip('\n ').replace('\n', ' ').replace('\\',''))
     random_id = str(random.random())[2:]
     return ShellTask(cmd=cmd, id=random_id)
 

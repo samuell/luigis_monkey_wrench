@@ -12,7 +12,7 @@ class MyWorkFlow(WorkflowTask):
     def requires(self):
 		# Create some tasks
         hejer = shell('echo hej > <o:hejfile:hej.txt>')
-        fooer = shell('cat <i:hejfile> | sed "s/hej/foo/g" > <o:foofile:<i:hejfile>.foo>')
+        fooer = shell('cat <i:hejfile> | sed "s/hej/foo/g" > <o:foofile:<i:hejfile:.txt|.foo>>')
 
 		# Connect them together
         fooer.inports['hejfile'] = hejer.outport('hejfile')
@@ -46,8 +46,13 @@ class MyWorkFlow(WorkflowTask):
         #   <o:OUTPUT_NAME:OUTPUT_FILENAME>
         # Output file names can also include the filename of an input:
         #   <o:some_output:<i:some_input>.some_extension>
+		# One can also just replace the extension, or ending, of the input
+		# filename, in the output file name, using the following syntax:
+        #   <o:OUTPUT_NAME:<i:INPUT_NAME:OLD_EXTENSION|NEW_EXTENSION>>
+		# E.g, to create <filename>.csv as output from <filename>.txt, we do:
+        #   <o:some_output:<i:some_input:.txt|.csv>>
         hejer = shell('echo hej > <o:hejfile:hej.txt>')
-        fooer = shell('cat <i:hejfile> | sed "s/hej/foo/g" > <o:foofile:<i:hejfile>.foo>')
+        fooer = shell('cat <i:hejfile> | sed "s/hej/foo/g" > <o:foofile:<i:hejfile:.txt|.foo>>')
 
         # Define the workflow "dependency graph" by telling how outputs
         # from tasks are re-used in inputs of other tasks

@@ -92,6 +92,9 @@ Run the example script (or one that you have already)
 ````bash
 python workflow_example.py --local-scheduler MyWorkFlow
 ````
+## Examples
+
+- [A "Real-world" NGS Bioinformatics example workflow](https://gist.github.com/samuell/6da9a7c1e03912fde62e)
 
 ## Current Status: Experimental
 

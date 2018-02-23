@@ -1,3 +1,7 @@
+# DEPRECATED!!!: 
+
+- This library is no longer maintained. The functionality of the library has moved into [SciLuigi](https://github.com/samuell/sciluigi).
+
 # Luigi's Monkey Wrench
 
 This is a small library (50 LOC exactly, as of Feb 12) that intends to make writing [Luigi]() workflows that use a lot of shell commands

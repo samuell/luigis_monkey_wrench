@@ -1,4 +1,4 @@
-# DEPRECATED!!!: 
+# DEPRECATED!
 
 - This library is no longer maintained. The functionality of the library has moved into [SciLuigi](https://github.com/samuell/sciluigi).
 
